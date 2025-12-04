@@ -1,0 +1,1509 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Earning Empire</title>
+
+  <!-- Monetag verification -->
+  <meta name="monetag" content="3cbabb02aa460fc490fafff3ad3a4ec5">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      padding-bottom:80px;min-height:100vh;
+    }
+
+    /* Splash Screen */
+    #splash{
+      position:fixed;inset:0;
+      background:radial-gradient(circle at top,#818cf8 0%,#312e81 60%,#111827 100%);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      z-index:2000;color:#e5e7eb;
+      animation:splashIn .6s ease-out;
+    }
+    #splash.hidden{opacity:0;pointer-events:none;transition:opacity .5s ease-out;}
+    .splash-logo{
+      width:96px;height:96px;border-radius:24px;
+      background:rgba(15,23,42,.6);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 18px 60px rgba(15,23,42,.9);
+      border:2px solid rgba(129,140,248,.8);
+      overflow:hidden;
+      animation:floatLogo 1.8s ease-in-out infinite;
+    }
+    .splash-logo img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .splash-title{
+      margin-top:18px;font-size:24px;font-weight:700;letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+    .splash-sub{
+      margin-top:6px;font-size:13px;color:#cbd5f5;
+    }
+    .splash-loader{
+      margin-top:22px;width:120px;height:4px;border-radius:999px;
+      background:rgba(15,23,42,.7);overflow:hidden;position:relative;
+    }
+    .splash-loader::after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(90deg,#22c55e,#a855f7,#f97316);
+      transform:translateX(-100%);
+      animation:loaderMove 1.3s linear infinite;
+    }
+    @keyframes splashIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes loaderMove{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+    .page{display:none;padding:20px;min-height:calc(100vh - 80px);animation:fadeIn .25s ease-in}
+    .page.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .container{max-width:520px;margin:0 auto}
+    .box{
+      background:rgba(255,255,255,.98);
+      padding:22px 20px;border-radius:20px;margin:16px 0;
+      box-shadow:0 10px 40px rgba(0,0,0,.3)
+    }
+    h2{
+      color:#fff;text-align:center;margin:26px 0 16px;font-size:28px;
+      text-shadow:0 2px 4px rgba(0,0,0,.3)
+    }
+    h3{color:#4f46e5;text-align:left;margin:0 0 16px;font-size:20px}
+    input, select, textarea{
+      width:100%;padding:12px 13px;border:2px solid #e0e7ff;border-radius:12px;
+      margin-bottom:12px;font-size:15px;transition:all .2s;background:#fff;
+    }
+    textarea{resize:vertical;min-height:60px}
+    input:focus, select:focus, textarea:focus{
+      outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.2)
+    }
+    button{
+      width:100%;padding:13px 16px;border-radius:999px;border:none;
+      background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+      font-size:16px;color:#fff;font-weight:600;cursor:pointer;margin-top:8px;
+      transition:all .18s;box-shadow:0 4px 14px rgba(99,102,241,.5);
+      transform-origin:center;
+    }
+    button:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(99,102,241,.7)}
+    button:active{transform:scale(.96)}
+    button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-outline{
+      background:transparent;color:#6366f1;border:2px solid rgba(99,102,241,.7);
+      box-shadow:none;
+    }
+    .btn-outline:hover{
+      background:rgba(99,102,241,.06);box-shadow:0 4px 12px rgba(99,102,241,.4)
+    }
+    .logout-btn{
+      background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);
+      box-shadow:0 4px 14px rgba(239,68,68,.6);
+    }
+    .logout-btn:hover{box-shadow:0 7px 20px rgba(239,68,68,.8)}
+    .navbar{
+      position:fixed;bottom:0;left:0;width:100%;height:70px;background:#fff;
+      display:none;justify-content:space-around;align-items:center;
+      box-shadow:0 -4px 20px rgba(0,0,0,.15);z-index:1000;
+    }
+    .navbar.active{display:flex}
+    .nav-item{
+      text-align:center;color:#9ca3af;font-size:11px;cursor:pointer;
+      padding:8px 8px;transition:all .2s;border-radius:12px;min-width:64px
+    }
+    .nav-item:hover{background:#f3f4f6}
+    .nav-item.active{color:#6366f1;font-weight:600}
+    .nav-icon{font-size:22px;margin-bottom:3px}
+    .coin-display{
+      background:rgba(255,255,255,.98);padding:20px 18px;border-radius:20px;
+      text-align:center;margin:16px 0;box-shadow:0 10px 40px rgba(0,0,0,.3)
+    }
+    .coin-label{font-size:15px;color:#6b7280;margin-bottom:6px}
+    .coin-count{
+      font-size:44px;font-weight:800;
+      background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;margin:4px 0;
+    }
+    .coin-suffix{font-size:13px;color:#9ca3af;margin-top:4px}
+    .text-center{text-align:center;color:#e5e7eb;margin-top:18px;font-size:14px}
+    .link{color:#e5e7eb;font-weight:600;text-decoration:underline;cursor:pointer}
+    .link:hover{opacity:.8}
+    .info-card{
+      background:#f3f4f6;padding:14px 13px;border-radius:14px;
+      margin:10px 0;color:#4b5563;font-size:14px;line-height:1.5
+    }
+    .stat-row{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:8px 0;border-bottom:1px solid #e5e7eb;font-size:14px;
+    }
+    .stat-row:last-child{border-bottom:none}
+    .stat-label{color:#6b7280;font-weight:500}
+    .stat-value{color:#111827;font-weight:700}
+    .alert{
+      background:#10b981;color:#fff;padding:11px;border-radius:12px;
+      margin:10px 0;text-align:center;font-weight:600;font-size:14px;display:none;
+    }
+    .alert.show{display:block;animation:slideDown .25s ease-out}
+    @keyframes slideDown{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .spinbox{
+      width:230px;height:230px;background:radial-gradient(circle,#fff 0%,#e5e7eb 100%);
+      border-radius:50%;margin:24px auto;display:flex;align-items:center;justify-content:center;
+      border:10px solid #6366f1;font-size:26px;font-weight:800;color:#4f46e5;
+      box-shadow:0 12px 40px rgba(79,70,229,.6);user-select:none;
+      position:relative;overflow:hidden;
+    }
+    .spinbox.spinning{animation:spinRotate 2s cubic-bezier(.17,.67,.12,.99)}
+    @keyframes spinRotate{from{transform:rotate(0)}to{transform:rotate(1440deg)}}
+    .status-pill{
+      padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600
+    }
+    .status-pending{background:#fef9c3;color:#854d0e}
+    .status-approved{background:#dcfce7;color:#166534}
+    .status-rejected{background:#fee2e2;color:#b91c1c}
+    .admin-tag{font-size:11px;color:#22c55e;font-weight:700;margin-left:6px}
+
+    .leaderboard-item{
+      background:#fff;padding:10px 12px;border-radius:14px;margin:6px 0;
+      display:flex;justify-content:space-between;align-items:center;
+      box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:14px;
+    }
+    .rank-badge{font-size:20px;margin-right:8px}
+    .small-text{font-size:12px;color:#6b7280;margin-top:4px}
+
+    .avatar-wrapper{display:flex;flex-direction:column;align-items:center;margin-bottom:14px}
+    .avatar-circle{
+      width:96px;height:96px;border-radius:50%;background:#e5e7eb;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;font-size:36px;color:#9ca3af;
+      border:3px solid #6366f1;box-shadow:0 4px 14px rgba(99,102,241,.6);margin-bottom:8px
+    }
+    .avatar-circle img{width:100%;height:100%;object-fit:cover}
+    .avatar-btn{width:auto;padding:6px 14px;font-size:13px;margin-top:2px}
+    .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+    .tab-btn{
+      flex:1;padding:8px 10px;border-radius:999px;border:none;font-size:13px;
+      background:#ede9fe;color:#4c1d95;font-weight:600;opacity:.7;
+    }
+    .tab-btn.active{background:#4c1d95;color:#f9fafb;opacity:1}
+    .admin-section{display:none}
+    .admin-section.active{display:block}
+    .code-input{font-family:monospace}
+
+    .event-card{
+      background:#fff;border-radius:14px;padding:8px 10px;margin-top:8px;
+      display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);
+    }
+    .event-thumb{
+      width:60px;height:60px;border-radius:14px;background:#e5e7eb;overflow:hidden;
+      flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#9ca3af;
+    }
+    .event-thumb img{width:100%;height:100%;object-fit:cover}
+    .event-body{flex:1}
+    .event-title{font-size:14px;font-weight:600;color:#111827}
+    .event-desc{font-size:12px;color:#6b7280;margin-top:2px}
+    .event-reward{font-size:12px;color:#4f46e5;margin-top:2px;font-weight:600}
+    .event-actions{display:flex;flex-direction:column;gap:4px;margin-left:4px}
+    .event-actions button{width:100%;padding:5px 10px;font-size:11px;border-radius:999px}
+
+    /* Redeem code box */
+    .redeem-code-box{
+      background:#111827;color:#e5e7eb;
+      padding:8px 10px;border-radius:12px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:8px;font-family:monospace;font-size:12px;
+    }
+    .redeem-code-text{overflow-x:auto;white-space:nowrap}
+    .redeem-copy-btn{
+      width:auto;padding:6px 10px;font-size:11px;
+      background:#22c55e;box-shadow:none;border-radius:999px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash -->
+  <div id="splash">
+    <div class="splash-logo">
+      <!-- এখানে আপনার logo.png show হবে -->
+      <img src="logo.png" alt="Earning Empire Logo" onerror="this.style.display='none';this.parentElement.textContent='EE';">
+    </div>
+    <div class="splash-title">Earning Empire</div>
+    <div class="splash-sub">Virtual rewards • Fun only • Ad based</div>
+    <div class="splash-loader"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- LOGIN -->
+    <div id="loginPage" class="page active">
+      <h2>🏆 Earning Empire</h2>
+      <div class="box">
+        <h3>Welcome Back</h3>
+        <input id="loginEmail" type="email" placeholder="Email Address" autocomplete="email" />
+        <input id="loginPass" type="password" placeholder="Password" autocomplete="current-password" />
+        <button id="loginBtn">Sign In</button>
+      </div>
+      <p class="text-center">
+        New here?
+        <span class="link" id="goToRegister">Create Account</span>
+      </p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerPage" class="page">
+      <h2>✨ Join Today</h2>
+      <div class="box">
+        <h3>Create Your Account</h3>
+        <input id="regEmail" type="email" placeholder="Email Address" autocomplete="email" />
+        <input id="regPass" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password" />
+        <button id="registerBtn">Create Account</button>
+      </div>
+      <p class="text-center">
+        Already have an account?
+        <span class="link" id="goToLogin">Sign In</span>
+      </p>
+    </div>
+
+    <!-- HOME -->
+    <div id="homePage" class="page">
+      <h2>🏠 Dashboard</h2>
+      <div class="coin-display">
+        <div class="coin-label">Current Balance</div>
+        <div class="coin-count" id="homeCoins">0</div>
+        <div class="coin-suffix">tokens</div>
+      </div>
+      <div class="box">
+        <h3>Quick Actions</h3>
+        <div class="info-card">
+          Watch short ads and complete simple tasks to earn tokens.
+          All coins are virtual and just for fun.
+        </div>
+        <button id="goToSpinBtn">🎡 Spin & Earn</button>
+        <button id="goToRewardsBtn">🎁 Daily Reward</button>
+        <button id="watchAdBtn" class="btn-outline">📺 Watch Ad & Earn</button>
+
+        <div class="info-card" style="margin-top:10px;">
+          <strong>Telegram Daily Code</strong><br/>
+          Admin will share a daily bonus code on Telegram. Only first limited users will get reward.
+          <input id="dailyCodeInput" placeholder="Enter daily code" />
+          <button id="dailyCodeSubmit" class="btn-outline">✅ Submit Code</button>
+          <div id="dailyCodeMsg" class="small-text"></div>
+        </div>
+
+        <!-- Events section (for user) -->
+        <div class="info-card" id="userEventsBlock">
+          <strong>Special Events</strong>
+          <div id="userEventList" class="small-text" style="margin-top:4px;">No active events.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPIN -->
+    <div id="spinPage" class="page">
+      <h2>🎡 Spin & Win</h2>
+      <div class="coin-display">
+        <div class="coin-label">Balance</div>
+        <div class="coin-count" id="spinCoins">0</div>
+        <div class="small-text">Each spin shows an ad first, then gives 5–50 random tokens.</div>
+      </div>
+      <div class="spinbox" id="spinWheel">SPIN</div>
+      <div class="box">
+        <button id="spinBtn">🎯 Spin Now</button>
+        <div class="info-card">
+          No daily limit. But every spin = one ad view.
+        </div>
+      </div>
+    </div>
+
+    <!-- WALLET + REDEEM -->
+    <div id="walletPage" class="page">
+      <h2>💼 Wallet</h2>
+      <div class="coin-display">
+        <div class="coin-label">Total Balance</div>
+        <div class="coin-count" id="walletCoins">0</div>
+        <div class="coin-suffix">tokens</div>
+      </div>
+
+      <div class="box">
+        <h3>Statistics</h3>
+        <div class="stat-row">
+          <span class="stat-label">Total Spins</span>
+          <span class="stat-value" id="totalSpins">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Daily Rewards Collected</span>
+          <span class="stat-value" id="totalRewards">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Total Tokens Earned</span>
+          <span class="stat-value" id="totalEarned">0</span>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>🎟 Redeem</h3>
+        <div class="info-card">
+          <div class="stat-row">
+            <span class="stat-label">Plan</span>
+            <span class="stat-value">10,000 tokens → ₹30 Play Store code</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Limit</span>
+            <span class="stat-value">Max 2 redeems per month</span>
+          </div>
+          <div class="small-text">
+            After requesting, admin will approve and upload your redeem code. You’ll see it below.
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="stat-row">
+            <span class="stat-label">Last Request Status</span>
+            <span class="stat-value">
+              <span id="redeemStatus" class="status-pill status-pending">No request yet</span>
+            </span>
+          </div>
+          <div class="stat-row" id="redeemCodeRow" style="display:none;flex-direction:column;align-items:flex-start;gap:6px;">
+            <span class="stat-label">Your Code</span>
+            <span class="stat-value" style="width:100%;">
+              <div class="redeem-code-box">
+                <div class="redeem-code-text" id="redeemCodeValue"></div>
+                <button id="copyRedeemBtn" class="redeem-copy-btn">Copy</button>
+              </div>
+            </span>
+          </div>
+        </div>
+        <button id="redeemRequestBtn">Request Redeem (10,000 tokens)</button>
+      </div>
+    </div>
+
+    <!-- DAILY REWARD -->
+    <div id="rewardPage" class="page">
+      <h2>🎁 Daily Reward</h2>
+      <div class="coin-display">
+        <div class="coin-label">Balance</div>
+        <div class="coin-count" id="rewardCoins">0</div>
+      </div>
+      <div id="rewardAlert" class="alert"></div>
+      <div class="box">
+        <h3>Once Per Day</h3>
+        <div class="info-card">
+          You can collect a random reward between 20–50 tokens once per day.
+          An ad will be shown before you receive the reward.
+        </div>
+        <button id="collectBtn">Collect Daily Tokens</button>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderPage" class="page">
+      <h2>🏆 Leaderboard</h2>
+      <div class="box">
+        <h3>This Week Top 10</h3>
+        <div id="leaderList" class="small-text">Loading…</div>
+      </div>
+      <div class="box">
+        <h3>Your Position</h3>
+        <div class="info-card">
+          <div class="stat-row">
+            <span class="stat-label">Your Tokens</span>
+            <span class="stat-value" id="leaderCoins">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Your Rank</span>
+            <span class="stat-value" id="leaderRank">–</span>
+          </div>
+          <div class="small-text">
+            Weekly rewards: 1st=500, 2nd=300, 3rd=100, 4–10=10 tokens. Auto added at week end.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="profilePage" class="page">
+      <h2>👤 Profile</h2>
+      <div class="box">
+        <h3>Your Account</h3>
+        <div class="avatar-wrapper">
+          <div class="avatar-circle" id="avatarCircle">
+            <span id="avatarInitial">👤</span>
+          </div>
+          <button class="avatar-btn btn-outline" id="changeAvatarBtn">Change Photo</button>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none" />
+        </div>
+        <div class="info-card">
+          <div class="stat-row">
+            <span class="stat-label">Name</span>
+            <span class="stat-value" style="width:55%;text-align:right">
+              <input id="displayNameInput" placeholder="Your name" style="margin-bottom:0;padding:7px 10px;font-size:13px;" />
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Email</span>
+            <span class="stat-value" id="userEmail" style="font-size:13px;word-break:break-all;">–</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Total Tokens</span>
+            <span class="stat-value" id="profileCoins">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Status</span>
+            <span class="stat-value">
+              Active <span id="adminBadge" class="admin-tag" style="display:none;">ADMIN</span>
+            </span>
+          </div>
+        </div>
+        <button id="saveProfileBtn">💾 Save Profile</button>
+        <button id="adminPanelBtn" style="display:none;margin-top:8px;">🛠 Admin Panel</button>
+        <button id="logoutBtn" class="logout-btn" style="margin-top:8px;">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPage" class="page">
+      <h2>🛠 Admin Panel</h2>
+      <div class="box">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="adminRedeem">Redeems</button>
+          <button class="tab-btn" data-tab="adminEvents">Events</button>
+          <button class="tab-btn" data-tab="adminDailyCode">Daily Code</button>
+          <button class="tab-btn" data-tab="adminLeaderboard">Leaderboard</button>
+        </div>
+
+        <!-- REDEEM MANAGER -->
+        <div id="adminRedeem" class="admin-section active">
+          <h3>Pending Redeem Requests</h3>
+          <div id="adminRedeemList" class="small-text">No data.</div>
+        </div>
+
+        <!-- EVENTS MANAGER -->
+        <div id="adminEvents" class="admin-section">
+          <h3>Create Event</h3>
+          <input id="eventTitle" placeholder="Event title" />
+          <textarea id="eventDesc" placeholder="Event description"></textarea>
+          <input id="eventReward" type="number" min="1" value="50" placeholder="Reward tokens" />
+          <input id="eventUrl" placeholder="Task link (YouTube/Telegram/WhatsApp etc.)" />
+          <input id="eventImageInput" type="file" accept="image/*" />
+          <button id="createEventBtn">➕ Create Event</button>
+          <div class="info-card small-text">Users will see events on Home, must open link and then verify to get reward.</div>
+          <h3 style="margin-top:12px;">Active Events</h3>
+          <div id="adminEventList" class="small-text">No events.</div>
+        </div>
+
+        <!-- DAILY CODE MANAGER -->
+        <div id="adminDailyCode" class="admin-section">
+          <h3>Daily Telegram Code</h3>
+          <input id="adminDailyCode" placeholder="Today code (e.g. EMPIRE50)" />
+          <input id="adminDailyReward" type="number" min="1" value="10" placeholder="Reward tokens per user" />
+          <input id="adminDailyMax" type="number" min="1" value="20" placeholder="Maximum users" />
+          <button id="setDailyCodeBtn">✅ Set Today's Code</button>
+          <div id="adminDailyInfo" class="small-text"></div>
+        </div>
+
+        <!-- LEADERBOARD MANAGER -->
+        <div id="adminLeaderboard" class="admin-section">
+          <h3>Weekly Leaderboard Control</h3>
+          <div class="info-card small-text">
+            The app automatically processes previous week on first open of a new week.
+            If you want, you can manually force process previous week once.
+          </div>
+          <button id="processWeekBtn" class="btn-outline">⚙️ Process Previous Week Now</button>
+          <div id="adminLbInfo" class="small-text" style="margin-top:6px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVBAR -->
+  <div class="navbar" id="bottomBar">
+    <div class="nav-item active" data-page="homePage"><div class="nav-icon">🏠</div>Home</div>
+    <div class="nav-item" data-page="spinPage"><div class="nav-icon">🎡</div>Spin</div>
+    <div class="nav-item" data-page="walletPage"><div class="nav-icon">💼</div>Wallet</div>
+    <div class="nav-item" data-page="rewardPage"><div class="nav-icon">🎁</div>Rewards</div>
+    <div class="nav-item" data-page="leaderPage"><div class="nav-icon">🏆</div>Leader</div>
+    <div class="nav-item" data-page="profilePage"><div class="nav-icon">👤</div>Profile</div>
+  </div>
+
+  <script>
+    /*************** SIMPLE LOCAL "BACKEND" ***************/
+    const STORAGE_KEYS = {
+      USERS: "ee_users",
+      CURRENT_USER: "ee_current_user_id",
+      WALLETS: "ee_wallets",
+      REDEEMS: "ee_redeems",
+      EVENTS: "ee_events",
+      DAILY_CODE: "ee_daily_code",
+      DAILY_CODE_CLAIMS: "ee_daily_code_claims",
+      LEADERBOARD: "ee_leaderboard_",
+      LAST_WEEK_PROCESSED: "ee_last_week_processed",
+      EVENT_PROGRESS_PREFIX: "ee_event_progress_",
+      DAILY_REWARD_PREFIX: "ee_daily_reward_"
+    };
+
+    // প্রথম ইউজার + এই ইমেইলগুলো auto-admin
+    const ADMIN_EMAILS = ["mitulbhowmik36@gmail.com"];
+
+    function loadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+    function saveJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function getUsers() { return loadJSON(STORAGE_KEYS.USERS, []); }
+    function saveUsers(users) { saveJSON(STORAGE_KEYS.USERS, users); }
+
+    function getWallets() { return loadJSON(STORAGE_KEYS.WALLETS, {}); }
+    function saveWallets(w) { saveJSON(STORAGE_KEYS.WALLETS, w); }
+
+    function getRedeems() { return loadJSON(STORAGE_KEYS.REDEEMS, []); }
+    function saveRedeems(r) { saveJSON(STORAGE_KEYS.REDEEMS, r); }
+
+    function getEvents() { return loadJSON(STORAGE_KEYS.EVENTS, []); }
+    function saveEvents(e) { saveJSON(STORAGE_KEYS.EVENTS, e); }
+
+    function getWeekId(date = new Date()) {
+      const tmp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = tmp.getUTCDay() || 7;
+      tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(),0,1));
+      const weekNo = Math.ceil((((tmp - yearStart) / 86400000) + 1)/7);
+      return tmp.getUTCFullYear() + "-W" + String(weekNo).padStart(2,"0");
+    }
+
+    function getWeekLeaderboard(weekId) {
+      return loadJSON(STORAGE_KEYS.LEADERBOARD+weekId, {});
+    }
+    function saveWeekLeaderboard(weekId, data) {
+      saveJSON(STORAGE_KEYS.LEADERBOARD+weekId, data);
+    }
+
+    function addToLeaderboard(userId, amount) {
+      const weekId = getWeekId();
+      const lb = getWeekLeaderboard(weekId);
+      lb[userId] = (lb[userId] || 0) + amount;
+      saveWeekLeaderboard(weekId, lb);
+    }
+
+    function processPreviousWeekRewards(force = false) {
+      const nowWeek = getWeekId();
+      const lastProcessed = localStorage.getItem(STORAGE_KEYS.LAST_WEEK_PROCESSED) || "";
+      if (!force && lastProcessed === nowWeek) return { processed:false, message:"Already processed for this week." };
+
+      const now = new Date();
+      now.setDate(now.getDate() - 7);
+      const prevWeekId = getWeekId(now);
+      const lb = getWeekLeaderboard(prevWeekId);
+      const userIds = Object.keys(lb);
+      if (!userIds.length) {
+        localStorage.setItem(STORAGE_KEYS.LAST_WEEK_PROCESSED, nowWeek);
+        return { processed:false, message:"No data for previous week." };
+      }
+
+      userIds.sort((a,b)=>lb[b]-lb[a]);
+      const rewards = [500,300,100];
+      const wallets = getWallets();
+      userIds.forEach((uid, index) => {
+        let bonus = 0;
+        if (index < 3) bonus = rewards[index];
+        else if (index < 10) bonus = 10;
+        if (!wallets[uid]) wallets[uid] = { coins:0,totalEarned:0,totalSpins:0,totalRewards:0 };
+        wallets[uid].coins += bonus;
+        wallets[uid].totalEarned += bonus;
+      });
+      saveWallets(wallets);
+      localStorage.setItem(STORAGE_KEYS.LAST_WEEK_PROCESSED, nowWeek);
+      return { processed:true, message:`Processed rewards for week ${prevWeekId}.` };
+    }
+
+    /*************** AUTH & USER STATE ***************/
+    let currentUser = null;
+
+    function setCurrentUser(userId) {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, userId);
+    }
+    function getCurrentUserId() {
+      return localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || null;
+    }
+    function getCurrentUser() {
+      const id = getCurrentUserId();
+      if (!id) return null;
+      const users = getUsers();
+      return users.find(u => u.id === id) || null;
+    }
+
+    function ensureWallet(userId) {
+      const wallets = getWallets();
+      if (!wallets[userId]) {
+        wallets[userId] = { coins:0,totalEarned:0,totalSpins:0,totalRewards:0 };
+        saveWallets(wallets);
+      }
+      return wallets[userId];
+    }
+
+    /*************** HELPERS ***************/
+    function qs(id){return document.getElementById(id);}
+    function showPage(id) {
+      document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+      const p = qs(id);
+      if (p) p.classList.add("active");
+      if (id !== "loginPage" && id !== "registerPage") {
+        qs("bottomBar").classList.add("active");
+      } else {
+        qs("bottomBar").classList.remove("active");
+      }
+      if (id==="leaderPage") renderLeaderboard();
+      if (id==="walletPage") refreshRedeemStatus();
+      if (id==="adminPage") {
+        renderAdminRedeems();
+        renderAdminEvents();
+        renderAdminDailyCode();
+      }
+      if (id==="homePage") renderUserEvents();
+      updateAllDisplays();
+    }
+    function showAlertElem(elem, msg){
+      elem.textContent = msg;
+      elem.classList.add("show");
+      setTimeout(()=>elem.classList.remove("show"),2500);
+    }
+
+    function getRandomSpinReward(){const arr=[5,10,20,25,30,35,40,50];return arr[Math.floor(Math.random()*arr.length)];}
+    function getRandomDailyReward(){const arr=[20,25,30,35,40,45,50];return arr[Math.floor(Math.random()*arr.length)];}
+    function getRandomAdsReward(){const arr=[5,10,15,20,25,30,35,40,50];return arr[Math.floor(Math.random()*arr.length)];}
+
+    // 🔥 Ad functions (এখানে পরে Monetag কোড বসাবেন)
+    function showRewardedAd(){
+      // Monetag rewarded ad code here
+      return new Promise(resolve=>setTimeout(resolve,300)); // demo
+    }
+    function showInterstitialAd(){
+      // Monetag interstitial ad code here
+      return new Promise(resolve=>setTimeout(resolve,250)); // demo
+    }
+    async function showAdGate(){
+      // Earn related action → rewarded ad প্রেফার
+      return showRewardedAd();
+    }
+
+    /*************** LOAD USER + WALLET ***************/
+    let coins = 0,totalSpins=0,totalRewards=0,totalEarned=0;
+    function loadStateForUser(user){
+      currentUser = user;
+      const w = ensureWallet(user.id);
+      coins = w.coins || 0;
+      totalSpins = w.totalSpins || 0;
+      totalRewards = w.totalRewards || 0;
+      totalEarned = w.totalEarned || 0;
+      updateAllDisplays();
+      updateProfileUI();
+      processPreviousWeekRewards();
+      renderUserEvents();
+    }
+
+    function saveWalletState(){
+      if (!currentUser) return;
+      const wallets = getWallets();
+      wallets[currentUser.id] = {
+        coins,totalSpins,totalRewards,totalEarned
+      };
+      saveWallets(wallets);
+    }
+
+    function addEarnings(amount, options={countSpin:false,countReward:false}) {
+      if (!currentUser) return;
+      coins += amount;
+      totalEarned += amount;
+      if (options.countSpin) totalSpins++;
+      if (options.countReward) totalRewards++;
+      saveWalletState();
+      addToLeaderboard(currentUser.id, amount);
+      updateAllDisplays();
+    }
+
+    function updateAllDisplays(){
+      const map = {
+        homeCoins: coins,
+        spinCoins: coins,
+        walletCoins: coins,
+        rewardCoins: coins,
+        leaderCoins: coins,
+        profileCoins: coins,
+        totalSpins: totalSpins,
+        totalRewards: totalRewards,
+        totalEarned: totalEarned
+      };
+      for (const [id,val] of Object.entries(map)) {
+        const el = qs(id);
+        if (el) el.textContent = val;
+      }
+    }
+
+    /*************** PROFILE & AVATAR ***************/
+    function updateProfileUI(){
+      const user = currentUser;
+      if (!user) return;
+      qs("userEmail").textContent = user.email;
+      qs("displayNameInput").value = user.displayName || "";
+      const adminBadge = qs("adminBadge");
+      const adminBtn = qs("adminPanelBtn");
+      const isAdmin = !!user.isAdmin;
+      if (adminBadge) adminBadge.style.display = isAdmin ? "inline" : "none";
+      if (adminBtn) adminBtn.style.display = isAdmin ? "block" : "none";
+
+      const circle = qs("avatarCircle");
+      const initial = qs("avatarInitial");
+      circle.innerHTML = "";
+      if (user.avatar && user.avatar.startsWith("data:image")) {
+        const img = document.createElement("img");
+        img.src = user.avatar;
+        circle.appendChild(img);
+      } else {
+        const base = user.displayName || user.email || "?";
+        initial.textContent = base.charAt(0).toUpperCase();
+        circle.appendChild(initial);
+      }
+    }
+
+    function saveProfile(){
+      if (!currentUser) return;
+      const users = getUsers();
+      const u = users.find(x=>x.id === currentUser.id);
+      if (!u) return;
+      u.displayName = qs("displayNameInput").value.trim() || null;
+      u.avatar = currentUser.avatar || u.avatar || null;
+      saveUsers(users);
+      currentUser = u;
+      updateProfileUI();
+      alert("Profile saved.");
+    }
+
+    function handleAvatarChange(evt){
+      const file = evt.target.files[0];
+      if (!file || !currentUser) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const users = getUsers();
+        const u = users.find(x=>x.id===currentUser.id);
+        if (!u) return;
+        u.avatar = dataUrl;
+        saveUsers(users);
+        currentUser = u;
+        updateProfileUI();
+        alert("Profile picture updated.");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /*************** DAILY REWARD ***************/
+    function getDailyKey(userId){
+      return STORAGE_KEYS.DAILY_REWARD_PREFIX+userId;
+    }
+    function collectDailyReward(){
+      if(!currentUser){alert("Please login first.");return;}
+      const key = getDailyKey(currentUser.id);
+      const today = new Date().toISOString().slice(0,10);
+      const last = localStorage.getItem(key);
+      if (last === today) {
+        alert("You already collected today's reward.");
+        return;
+      }
+      showAdGate().then(()=>{
+        const reward = getRandomDailyReward();
+        addEarnings(reward,{countReward:true});
+        localStorage.setItem(key,today);
+        const alertBox = qs("rewardAlert");
+        showAlertElem(alertBox,`🎉 You received ${reward} tokens today!`);
+      });
+    }
+
+    /*************** SPIN ***************/
+    let spinning = false;
+    function handleSpin(){
+      if (!currentUser){alert("Please login first.");return;}
+      if (spinning) return;
+      spinning = true;
+      showAdGate().then(()=>{
+        const wheel = qs("spinWheel");
+        const btn = qs("spinBtn");
+        wheel.classList.add("spinning");
+        wheel.textContent = "🎯";
+        btn.disabled = true;
+        setTimeout(()=>{
+          const reward = getRandomSpinReward();
+          addEarnings(reward,{countSpin:true});
+          wheel.classList.remove("spinning");
+          wheel.textContent = "+"+reward;
+          btn.disabled = false;
+          setTimeout(()=>{wheel.textContent = "SPIN";},1500);
+          spinning = false;
+        },1600);
+      });
+    }
+
+    /*************** WATCH AD & EARN ***************/
+    function watchAdAndEarn(){
+      if (!currentUser){alert("Please login first.");return;}
+      // এখানে interstitial ব্যবহার করলেও পারেন
+      showInterstitialAd().then(()=>{
+        const reward = getRandomAdsReward();
+        addEarnings(reward,{});
+        alert(`You earned ${reward} tokens from ad.`);
+      });
+    }
+
+    /*************** REDEEM ***************/
+    const REDEEM_COST = 10000;
+    const REDEEM_AMOUNT = 30;
+    const MAX_REDEEM_PER_MONTH = 2;
+
+    function setRedeemStatus(status,code){
+      const el = qs("redeemStatus");
+      const codeRow = qs("redeemCodeRow");
+      const codeVal = qs("redeemCodeValue");
+      el.className = "status-pill";
+      if(!status){
+        el.textContent="No request yet";
+        el.classList.add("status-pending");
+        codeRow.style.display="none";
+        return;
+      }
+      if(status==="pending"){
+        el.textContent="Pending";
+        el.classList.add("status-pending");
+        codeRow.style.display="none";
+      }else if(status==="approved"){
+        el.textContent="Approved";
+        el.classList.add("status-approved");
+        if(code){
+          codeRow.style.display="flex";
+          codeVal.textContent=code;
+        }else codeRow.style.display="none";
+      }else if(status==="rejected"){
+        el.textContent="Rejected";
+        el.classList.add("status-rejected");
+        codeRow.style.display="none";
+      }
+    }
+
+    function refreshRedeemStatus(){
+      if(!currentUser) return;
+      const redeems = getRedeems().filter(r=>r.userId===currentUser.id);
+      if(!redeems.length){
+        setRedeemStatus(null,null);
+        return;
+      }
+      const last = redeems.sort((a,b)=>b.createdAt - a.createdAt)[0];
+      setRedeemStatus(last.status,last.code);
+    }
+
+    function getMonthlyRedeemCount(){
+      if(!currentUser) return 0;
+      const redeems = getRedeems().filter(r=>r.userId===currentUser.id);
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      return redeems.filter(r=>{
+        const d = new Date(r.createdAt);
+        return d.getFullYear()===year && d.getMonth()===month;
+      }).length;
+    }
+
+    function handleRedeemRequest(){
+      if(!currentUser){alert("Please login first.");return;}
+      if(coins < REDEEM_COST){
+        alert("Not enough tokens. Need 10,000.");
+        return;
+      }
+      const used = getMonthlyRedeemCount();
+      if (used >= MAX_REDEEM_PER_MONTH){
+        alert("Monthly redeem limit reached.");
+        return;
+      }
+      showInterstitialAd().then(()=>{
+        if(!confirm("Request redeem for ₹30 Play Store code? 10,000 tokens will be deducted.")) return;
+        const redeems = getRedeems();
+        const newReq = {
+          id: Date.now(),
+          userId: currentUser.id,
+          email: currentUser.email,
+          tokens: REDEEM_COST,
+          amount: REDEEM_AMOUNT,
+          status: "pending",
+          code: null,
+          createdAt: Date.now(),
+          processedAt: null
+        };
+        redeems.push(newReq);
+        saveRedeems(redeems);
+        coins -= REDEEM_COST;
+        saveWalletState();
+        refreshRedeemStatus();
+        updateAllDisplays();
+        alert("Redeem request created. Wait for admin approval.");
+      });
+    }
+
+    function initCopyRedeemBtn(){
+      const btn = qs("copyRedeemBtn");
+      if(!btn) return;
+      btn.onclick = ()=>{
+        const code = (qs("redeemCodeValue").textContent || "").trim();
+        if(!code){
+          alert("No code to copy.");
+          return;
+        }
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(code).then(()=>alert("Code copied!")).catch(()=>{
+            fallbackCopy(code);
+          });
+        }else{
+          fallbackCopy(code);
+        }
+      };
+    }
+    function fallbackCopy(text){
+      const ta=document.createElement("textarea");
+      ta.value=text;document.body.appendChild(ta);
+      ta.select();document.execCommand("copy");
+      document.body.removeChild(ta);
+      alert("Code copied!");
+    }
+
+    /*************** ADMIN: REDEEMS ***************/
+    function renderAdminRedeems(){
+      const box = qs("adminRedeemList");
+      const user = currentUser;
+      if (!user || !user.isAdmin) {
+        box.textContent = "You are not admin.";
+        return;
+      }
+      const redeems = getRedeems().sort((a,b)=>a.createdAt - b.createdAt);
+      const pending = redeems.filter(r=>r.status==="pending");
+      if(!pending.length){
+        box.textContent = "No pending requests.";
+        return;
+      }
+      const users = getUsers();
+      box.innerHTML = pending.map(r=>{
+        const u = users.find(x=>x.id===r.userId);
+        return `
+          <div class="info-card" data-id="${r.id}">
+            <div class="stat-row">
+              <span class="stat-label">User</span>
+              <span class="stat-value" style="font-size:12px;">${u?(u.displayName||u.email):r.email}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Tokens</span><span class="stat-value">${r.tokens}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Amount</span><span class="stat-value">₹${r.amount}</span>
+            </div>
+            <div class="small-text">Requested: ${new Date(r.createdAt).toLocaleString()}</div>
+            <input class="code-input" placeholder="Enter Play Store code" />
+            <button class="approveRedeem btn-outline" style="margin-top:6px;">✅ Approve</button>
+            <button class="rejectRedeem btn-outline" style="margin-top:4px;">❌ Reject</button>
+          </div>
+        `;
+      }).join("");
+
+      box.querySelectorAll(".approveRedeem").forEach(btn=>{
+        btn.onclick = () => {
+          const card = btn.closest(".info-card");
+          const id = Number(card.dataset.id);
+          const input = card.querySelector(".code-input");
+          const code = input.value.trim();
+          if(!code){alert("Enter code first.");return;}
+          const redeems = getRedeems();
+          const r = redeems.find(x=>x.id===id);
+          if(!r)return;
+          r.status="approved";
+          r.code=code;
+          r.processedAt=Date.now();
+          saveRedeems(redeems);
+          renderAdminRedeems();
+          if(currentUser) refreshRedeemStatus();
+          alert("Approved.");
+        };
+      });
+      box.querySelectorAll(".rejectRedeem").forEach(btn=>{
+        btn.onclick = () => {
+          const card = btn.closest(".info-card");
+          const id = Number(card.dataset.id);
+          if(!confirm("Reject this request?"))return;
+          const redeems = getRedeems();
+          const r = redeems.find(x=>x.id===id);
+          if(!r)return;
+          r.status="rejected";
+          r.processedAt=Date.now();
+          saveRedeems(redeems);
+          renderAdminRedeems();
+          alert("Rejected.");
+        };
+      });
+    }
+
+    /*************** ADMIN: EVENTS ***************/
+    let eventImageData = null;
+
+    function renderAdminEvents(){
+      const list = qs("adminEventList");
+      if (!currentUser || !currentUser.isAdmin) {
+        list.textContent = "You are not admin.";
+        return;
+      }
+      const events = getEvents().filter(e=>!e.deleted);
+      if(!events.length){
+        list.textContent = "No events.";
+        return;
+      }
+      list.innerHTML = events.map(e=>`
+        <div class="info-card" data-id="${e.id}">
+          <div class="stat-row">
+            <span class="stat-label">${e.title}</span>
+            <span class="stat-value">${e.reward} tokens</span>
+          </div>
+          <div class="small-text">${e.description||""}</div>
+          <div class="small-text">Link: ${e.url ? e.url : "Not set"}</div>
+          <div class="small-text">Created: ${new Date(e.createdAt).toLocaleDateString()}</div>
+          ${e.image ? '<div style="margin-top:6px;"><img src="'+e.image+'" style="width:60px;height:60px;border-radius:12px;object-fit:cover;"></div>' : ''}
+          <button class="btn-outline delEventBtn" style="margin-top:5px;">🗑 Remove</button>
+        </div>
+      `).join("");
+      list.querySelectorAll(".delEventBtn").forEach(btn=>{
+        btn.onclick = ()=>{
+          const card = btn.closest(".info-card");
+          const id = Number(card.dataset.id);
+          const events = getEvents();
+          const ev = events.find(x=>x.id===id);
+          if(ev){ev.deleted=true;saveEvents(events);renderAdminEvents();renderUserEvents();}
+        };
+      });
+    }
+
+    function getEventProgressKey(userId){
+      return STORAGE_KEYS.EVENT_PROGRESS_PREFIX+userId;
+    }
+    function loadEventProgress(){
+      if(!currentUser) return {};
+      return loadJSON(getEventProgressKey(currentUser.id),{});
+    }
+    function saveEventProgress(progress){
+      if(!currentUser) return;
+      saveJSON(getEventProgressKey(currentUser.id),progress);
+    }
+
+    function renderUserEvents(){
+      const container = qs("userEventList");
+      if(!container) return;
+      const events = getEvents().filter(e=>!e.deleted);
+      if(!events.length){
+        container.textContent = "No active events.";
+        return;
+      }
+      const progress = currentUser ? loadEventProgress() : {};
+      container.innerHTML = "";
+      events.forEach(ev=>{
+        const state = progress[ev.id] || {opened:false,completed:false};
+        const card = document.createElement("div");
+        card.className = "event-card";
+        card.dataset.id = ev.id;
+
+        const thumb = document.createElement("div");
+        thumb.className="event-thumb";
+        if(ev.image){
+          const img=document.createElement("img");
+          img.src=ev.image;
+          thumb.appendChild(img);
+        }else{
+          thumb.textContent="🎯";
+        }
+
+        const body = document.createElement("div");
+        body.className="event-body";
+        const titleEl=document.createElement("div");
+        titleEl.className="event-title";
+        titleEl.textContent=ev.title;
+        const descEl=document.createElement("div");
+        descEl.className="event-desc";
+        descEl.textContent=ev.description||"";
+        const rewardEl=document.createElement("div");
+        rewardEl.className="event-reward";
+        rewardEl.textContent=`Reward: ${ev.reward} tokens`;
+        body.appendChild(titleEl);
+        body.appendChild(descEl);
+        body.appendChild(rewardEl);
+
+        const actions=document.createElement("div");
+        actions.className="event-actions";
+
+        const openBtn=document.createElement("button");
+        openBtn.className="btn-outline";
+        openBtn.textContent="Open Task";
+        openBtn.onclick=()=>{
+          if(!currentUser){alert("Please login first.");return;}
+          if(!ev.url){
+            alert("No link set for this event.");
+            return;
+          }
+          window.open(ev.url,"_blank");
+          const prog = loadEventProgress();
+          prog[ev.id] = prog[ev.id] || {opened:false,completed:false};
+          prog[ev.id].opened = true;
+          saveEventProgress(prog);
+        };
+
+        const verifyBtn=document.createElement("button");
+        verifyBtn.textContent = state.completed ? "Completed" : "Verify Joined";
+        verifyBtn.disabled = state.completed || !state.opened;
+        verifyBtn.onclick=()=>{
+          if(!currentUser){alert("Please login first.");return;}
+          const prog = loadEventProgress();
+          const st = prog[ev.id] || {opened:false,completed:false};
+          if(st.completed){
+            alert("Already completed.");
+            return;
+          }
+          if(!st.opened){
+            alert("Please open the task link and join, then come back and verify.");
+            return;
+          }
+          showAdGate().then(()=>{
+            addEarnings(ev.reward,{});
+            st.completed=true;
+            prog[ev.id]=st;
+            saveEventProgress(prog);
+            alert("Task completed successfully! Reward added!");
+            renderUserEvents();
+          });
+        };
+
+        actions.appendChild(openBtn);
+        actions.appendChild(verifyBtn);
+
+        card.appendChild(thumb);
+        card.appendChild(body);
+        card.appendChild(actions);
+
+        container.appendChild(card);
+      });
+    }
+
+    function createEvent(){
+      if(!currentUser || !currentUser.isAdmin){alert("Not admin.");return;}
+      const title = qs("eventTitle").value.trim();
+      const desc = qs("eventDesc").value.trim();
+      const reward = Number(qs("eventReward").value)||0;
+      const url = qs("eventUrl").value.trim();
+      if(!title || reward<=0){
+        alert("Title and reward required.");
+        return;
+      }
+      const events = getEvents();
+      events.push({
+        id: Date.now(),
+        title,
+        description: desc,
+        reward,
+        url: url || null,
+        image: eventImageData || null,
+        createdAt: Date.now(),
+        deleted:false
+      });
+      saveEvents(events);
+      qs("eventTitle").value="";
+      qs("eventDesc").value="";
+      qs("eventReward").value="50";
+      qs("eventUrl").value="";
+      qs("eventImageInput").value="";
+      eventImageData=null;
+      renderAdminEvents();
+      alert("Event created.");
+      renderUserEvents();
+    }
+
+    function handleEventImageChange(evt){
+      const file = evt.target.files[0];
+      if(!file){eventImageData=null;return;}
+      const reader = new FileReader();
+      reader.onload = ()=>{eventImageData = reader.result;};
+      reader.readAsDataURL(file);
+    }
+
+    /*************** ADMIN: DAILY CODE ***************/
+    function setDailyCode(){
+      if(!currentUser || !currentUser.isAdmin){alert("Not admin.");return;}
+      const code = qs("adminDailyCode").value.trim();
+      const reward = Number(qs("adminDailyReward").value)||0;
+      const maxUsers = Number(qs("adminDailyMax").value)||0;
+      if(!code || reward<=0 || maxUsers<=0){
+        alert("Code, reward, max users required.");
+        return;
+      }
+      const today = new Date().toISOString().slice(0,10);
+
+      const data = {
+        date: today,
+        code: code.toUpperCase(),
+        reward,
+        maxUsers
+      };
+
+      saveJSON(STORAGE_KEYS.DAILY_CODE, data);
+      saveJSON(STORAGE_KEYS.DAILY_CODE_CLAIMS, []); // reset
+      renderAdminDailyCode();
+      alert("Today's daily code activated!");
+    }
+
+    function renderAdminDailyCode(){
+      const box = qs("adminDailyInfo");
+      if(!currentUser || !currentUser.isAdmin){
+        box.textContent="Not admin.";
+        return;
+      }
+      const data = loadJSON(STORAGE_KEYS.DAILY_CODE, null);
+      const claims = loadJSON(STORAGE_KEYS.DAILY_CODE_CLAIMS, []);
+      if(!data){
+        box.textContent = "No code for today.";
+        return;
+      }
+      box.textContent = `Code: ${data.code} | Reward: ${data.reward} | Limit: ${data.maxUsers} | Claimed: ${claims.length}`;
+    }
+
+    function submitDailyCode(){
+      if(!currentUser){alert("Please login first.");return;}
+      const input = qs("dailyCodeInput");
+      const msg = qs("dailyCodeMsg");
+      const data = loadJSON(STORAGE_KEYS.DAILY_CODE, null);
+
+      if(!data){
+        msg.textContent = "No active code.";
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0,10);
+      if(data.date !== today){
+        msg.textContent = "Today's code expired or not set.";
+        return;
+      }
+
+      const entered = input.value.trim().toUpperCase();
+      if(!entered){
+        msg.textContent = "Enter valid code.";
+        return;
+      }
+      if(entered !== data.code){
+        msg.textContent = "Invalid code.";
+        return;
+      }
+
+      let claims = loadJSON(STORAGE_KEYS.DAILY_CODE_CLAIMS, []);
+      if(claims.includes(currentUser.id)){
+        msg.textContent = "You already claimed today.";
+        return;
+      }
+      if(claims.length >= data.maxUsers){
+        msg.textContent = "Code limit reached.";
+        return;
+      }
+
+      showAdGate().then(()=>{
+        claims.push(currentUser.id);
+        saveJSON(STORAGE_KEYS.DAILY_CODE_CLAIMS, claims);
+        addEarnings(data.reward, {});
+        msg.textContent = `🎉 You earned ${data.reward} tokens!`;
+        input.value = "";
+        renderAdminDailyCode();
+      });
+    }
+
+    /*************** LEADERBOARD ***************/
+    function renderLeaderboard(){
+      const list = qs("leaderList");
+      if(!currentUser){
+        list.textContent="Login to see leaderboard.";
+        return;
+      }
+      const weekId = getWeekId();
+      const lb = getWeekLeaderboard(weekId);
+      const users = getUsers();
+      const pairs = Object.entries(lb);
+      if(!pairs.length){
+        list.textContent="No data yet.";
+        return;
+      }
+      pairs.sort((a,b)=>b[1]-a[1]);
+      const top10 = pairs.slice(0,10);
+
+      list.innerHTML = top10.map(([uid,score],index)=>{
+        const u = users.find(x=>x.id===uid);
+        const name = (u && (u.displayName||u.email)) || "Unknown";
+        const medal = index===0?"🥇":index===1?"🥈":index===2?"🥉":"#"+(index+1);
+        return `
+          <div class="leaderboard-item">
+            <div><span class="rank-badge">${medal}</span>${name}</div>
+            <div class="stat-value">${score}</div>
+          </div>
+        `;
+      }).join("");
+
+      const myIndex = pairs.findIndex(([uid])=>uid===currentUser.id);
+      if (myIndex === -1) {
+        qs("leaderRank").textContent = "Not ranked";
+      } else {
+        qs("leaderRank").textContent = "#"+(myIndex+1);
+      }
+    }
+
+    /*************** AUTH ***************/
+    function register(){
+      const email = qs("regEmail").value.trim();
+      const pass = qs("regPass").value;
+      if(!email || !pass){
+        alert("Fill all fields.");
+        return;
+      }
+      if(pass.length<6){
+        alert("Password must be at least 6 characters.");
+        return;
+      }
+      const users = getUsers();
+      if(users.some(u=>u.email===email)){
+        alert("Email already registered.");
+        return;
+      }
+      const isFirstUser = users.length === 0;
+      const isAdmin = isFirstUser || ADMIN_EMAILS.includes(email);
+      const user = {
+        id: "u_"+Date.now(),
+        email,
+        password: pass,
+        displayName: null,
+        avatar: null,
+        isAdmin
+      };
+      users.push(user);
+      saveUsers(users);
+      alert("Account created. Now login.");
+      showPage("loginPage");
+    }
+
+    function login(){
+      const email = qs("loginEmail").value.trim();
+      const pass = qs("loginPass").value;
+      if(!email || !pass){
+        alert("Enter email and password.");
+        return;
+      }
+      const users = getUsers();
+      const user = users.find(u=>u.email===email && u.password===pass);
+      if(!user){
+        alert("Invalid credentials.");
+        return;
+      }
+      setCurrentUser(user.id);
+      loadStateForUser(user);
+      showPage("homePage");
+      qs("bottomBar").classList.add("active");
+    }
+
+    function logout(){
+      if(!confirm("Sign out?"))return;
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      currentUser = null;
+      coins=totalSpins=totalRewards=totalEarned=0;
+      showPage("loginPage");
+    }
+
+    /*************** ADMIN PANEL TABS ***************/
+    function initAdminTabs(){
+      document.querySelectorAll(".tab-btn").forEach(btn=>{
+        btn.onclick = ()=>{
+          const tab = btn.dataset.tab;
+          document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+          btn.classList.add("active");
+          document.querySelectorAll(".admin-section").forEach(sec=>sec.classList.remove("active"));
+          const sec = qs(tab);
+          if(sec) sec.classList.add("active");
+        };
+      });
+    }
+
+    /*************** NAV ***************/
+    function initNav(){
+      document.querySelectorAll(".nav-item").forEach(item=>{
+        item.addEventListener("click",()=>{
+          document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+          item.classList.add("active");
+          showPage(item.dataset.page);
+        });
+      });
+    }
+
+    /*************** INIT ***************/
+    function initApp(){
+      initNav();
+      initAdminTabs();
+      initCopyRedeemBtn();
+
+      qs("goToRegister").onclick = ()=>showPage("registerPage");
+      qs("goToLogin").onclick = ()=>showPage("loginPage");
+
+      qs("registerBtn").onclick = register;
+      qs("loginBtn").onclick = login;
+      qs("logoutBtn").onclick = logout;
+
+      qs("goToSpinBtn").onclick = ()=>{document.querySelector('[data-page="spinPage"]').click();};
+      qs("goToRewardsBtn").onclick = ()=>{document.querySelector('[data-page="rewardPage"]').click();};
+
+      qs("spinBtn").onclick = handleSpin;
+      qs("spinWheel").onclick = handleSpin;
+      qs("collectBtn").onclick = collectDailyReward;
+      qs("watchAdBtn").onclick = watchAdAndEarn;
+      qs("redeemRequestBtn").onclick = handleRedeemRequest;
+
+      qs("changeAvatarBtn").onclick = ()=>qs("avatarInput").click();
+      qs("avatarInput").addEventListener("change",handleAvatarChange);
+      qs("saveProfileBtn").onclick = saveProfile;
+      qs("adminPanelBtn").onclick = ()=>showPage("adminPage");
+
+      qs("createEventBtn").onclick = createEvent;
+      qs("eventImageInput").addEventListener("change",handleEventImageChange);
+      qs("setDailyCodeBtn").onclick = setDailyCode;
+      qs("dailyCodeSubmit").onclick = submitDailyCode;
+      qs("processWeekBtn").onclick = ()=>{
+        const result = processPreviousWeekRewards(true);
+        qs("adminLbInfo").textContent = result.message;
+      };
+
+      const user = getCurrentUser();
+      if(user){
+        loadStateForUser(user);
+        showPage("homePage");
+        qs("bottomBar").classList.add("active");
+      }else{
+        showPage("loginPage");
+      }
+    }
+
+    // Splash + Init
+    document.addEventListener("DOMContentLoaded",()=>{
+      const splash = document.getElementById("splash");
+      const container = document.querySelector(".container");
+      // শুরুতে শুধু splash দেখাই
+      container.style.display = "none";
+      setTimeout(()=>{
+        splash.classList.add("hidden");
+        container.style.display = "";
+        initApp();
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
